@@ -1,0 +1,240 @@
+---
+- hosts: localhost
+  gather_facts: no
+
+  vars:
+    vcenter_hostname: hxafnvmevcsa.wwtpoc.local
+    vcenter_username: administrator@vsphere.local
+    vcenter_password: WWTwwt1!
+    datacenter_name: HXNVME
+    cluster_name: HXNVME
+    vm_network: vm-nvme-network-72
+    vm_folder_name: Test-JA
+    vm_name: test_vm_ja
+    vm_disk_size: 100
+    vm_disk_provisioning: thin
+    vm_datastore: Phil
+    vm_memory: 4096
+    vm_cpus: 2
+    vm_scsi: lsilogicsas
+    ovf_vm_name: test_ovf_ja
+    ovf_folder_name: /HXNVME/vm/Test-JA 
+    eval_iso: ISO/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso
+    prod_iso: ISO/en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso
+    test_iso: ISO/Windows2019-with-unattend.iso
+    runme: true
+
+
+  tasks:
+  - name: Create VM folder {{ vm_folder_name  }} on {{ datacenter_name }}
+    vcenter_folder:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter_name: "{{ datacenter_name }}"
+      folder_name: "{{ vm_folder_name }}"
+      folder_type: vm
+      state: present
+    register: vm_folder_creation_result
+
+  - name: Create VM in {{ vm_folder_name  }} on {{ datacenter_name }}
+    vmware_guest:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: no
+      datacenter: "{{ datacenter_name }}"
+      cluster: "{{ cluster_name }}"
+      folder: "{{ vm_folder_name }}"
+      name: "{{ vm_name }}"
+      state: present
+      guest_id: windows9Server64Guest
+      cdrom:
+      - controller_number: 0
+        unit_number: 0
+        state: present
+        type: iso
+        iso_path: "[Phil] {{ test_iso }}"
+      disk:
+      - size_gb: "{{ vm_disk_size }}"
+        type: "{{ vm_disk_provisioning }}"
+        datastore: "{{ vm_datastore }}"
+      hardware:
+        memory_mb: "{{ vm_memory }}"
+        num_cpus: "{{ vm_cpus }}"
+        scsi: "{{ vm_scsi }}"
+      networks:
+      - name: "{{ vm_network }}"
+        device_type: e1000
+        wait_for_ip_address: no
+    delegate_to: localhost
+    register: deploy_vm
+
+
+#  - name: Add custom attributes to VM
+#    vmware_guest_custom_attributes:
+#      hostname: "{{ vcenter_hostname }}"
+#      username: "{{ vcenter_username }}"
+#      password: "{{ vcenter_password }}"
+#      validate_certs: no
+#      datacenter: "{{ datacenter_name }}"
+#      name: "{{ vm_name }}"
+#      state: absent
+#      attributes:
+#        - name: floppy0.present
+#    delegate_to: localhost
+#    register: rem_attributes
+
+
+
+#  - name: Deploy Server 2019 OVF from CB
+#    vmware_deploy_ovf:
+#      hostname: "{{ vcenter_hostname }}"
+#      username: "{{ vcenter_username }}"
+#      password: "{{ vcenter_password }}"
+#      validate_certs: no
+#      datacenter: "{{ datacenter_name }}"
+#      cluster: "{{ cluster_name }}"
+#      folder: "{{ ovf_folder_name }}"
+#      name: "{{ ovf_vm_name }}"
+#      allow_duplicates: no
+#      datastore: "{{ vm_datastore }}"
+#      disk_provisioning: thin
+#      networks:
+#        "dvportgroup-8107:e8c91fc5-d931-4419-9e98-3ff840aa3f09": vm-nvme-network-72
+#      power_on: no
+#      ovf: /home/alexandj/test-project/win19/Template-Win2019-09232019-syspreped.ovf
+#    delegate_to: localhost
+
+
+#  - name: Check for floppy image
+#    vsphere_file:
+#      hostname: "{{ vcenter_hostname }}"
+#      username: "{{ vcenter_username }}"
+#      password: "{{ vcenter_password }}"
+#      validate_certs: no
+#      datacenter: "{{ datacenter_name }}"
+#      datastore: "{{ vm_datastore }}"
+#      path: ISO/unattend.img
+#      state: file
+#    delegate_to: localhost
+#    register: flp_img_chk
+#    ignore_errors: yes
+
+
+
+#  - name: Copy floppy image to datastore
+#    vsphere_copy:
+#      hostname: "{{ vcenter_hostname }}"
+#      username: "{{ vcenter_username }}"
+#      password: "{{ vcenter_password }}"
+#      validate_certs: no
+#      src: /home/alexandj/test-project/win19/unattend.img
+#      datacenter: "{{ datacenter_name }}"
+#      datastore: "{{ vm_datastore }}"
+#      path: ISO/unattend.img
+#    delegate_to: localhost
+#    when: flp_img_chk is failed
+
+
+
+#  - name: Remove old VMX file from datastore
+#    vsphere_file:
+#      hostname: "{{ vcenter_hostname }}"
+#      username: "{{ vcenter_username }}"
+#      password: "{{ vcenter_password }}"
+#      validate_certs: no
+#      datacenter: "{{ datacenter_name }}"
+#      datastore: "{{ vm_datastore }}"
+#      path: test_vm_ja/test_vm_ja.vmx
+#      state: absent
+#    delegate_to: localhost
+#    when: runme
+
+
+#  - name: Pause for 10 seconds
+#    pause:
+#      seconds: 10
+#    when: runme
+
+
+#  - name: Copy new VMX file to datastore
+#    vsphere_copy:
+#      hostname: "{{ vcenter_hostname }}"
+#      username: "{{ vcenter_username }}"
+#      password: "{{ vcenter_password }}"
+#      validate_certs: no
+#      src: /home/alexandj/test-project/win19/test_vm_ja.vmx
+#      datacenter: "{{ datacenter_name }}"
+#      datastore: "{{ vm_datastore }}"
+#      path: test_vm_ja/test_vm_ja.vmx
+#    delegate_to: localhost
+#    when: runme
+
+
+#  - name: Pause for 30 seconds
+#    pause:
+#      seconds: 30
+
+
+  - name: Add boot delay
+    vmware_guest_boot_manager:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: no
+      name: "{{ vm_name }}"
+      boot_delay: 10000
+#      enter_bios_setup: False
+#      boot_retry_enabled: True
+#      boot_retry_delay: 20000
+#      boot_firmware: bios
+#      secure_boot_enabled: False
+#      boot_order:
+#        - cdrom
+#        - disk
+#        - ethernet
+#        - floppy
+    delegate_to: localhost
+    register: bm_boot_order
+
+#  - name: Add custom attributes to VM
+#    vmware_guest_custom_attributes:
+#      hostname: "{{ vcenter_hostname }}"
+#      username: "{{ vcenter_username }}"
+#      password: "{{ vcenter_password }}"
+#      validate_certs: no
+#      datacenter: "{{ datacenter_name }}"
+#      name: "{{ vm_name }}"
+#      state: present
+#      attributes:
+#        - name: floppy0.present
+#          value: "true"
+#        - name: floppy0.fileType
+#          value: "file"
+#        - name: floppy0.fileName
+#          value: "/vmfs/volumes/Phil/ISO/unattend.img"
+#    delegate_to: localhost
+#    register: add_attributes
+
+
+#  - name: Pause for 60 seconds
+#    pause:
+#      seconds: 60
+
+
+  - name: Power on VM
+    vmware_guest_powerstate:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: no
+      folder: /HXNVME/vm/Test-JA
+      name: "{{ vm_name }}"
+      state: powered-on
+    delegate_to: localhost
+    register: power_on_vm
+
+...
+

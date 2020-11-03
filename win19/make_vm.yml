@@ -1,0 +1,73 @@
+---
+- hosts: localhost
+  gather_facts: no
+
+  vars:
+    vcenter_hostname: hxafnvmevcsa.wwtpoc.local
+    vcenter_username: administrator@vsphere.local
+    vcenter_password: WWTwwt1!
+    datacenter_name: HXNVME
+    cluster_name: HXNVME
+    #datastore_name: Phil
+    vm_network: vm-nvme-network-72
+    vm_folder_name: Test-JA
+    vm_name: test_vm_ja
+    vm_disk_size: 100
+    vm_disk_provisioning: thin
+    vm_datastore: Phil
+    vm_memory: 512
+    vm_cpus: 2
+    vm_scsi: paravirtual
+
+
+
+    worker_template_name: WWTBench-Template
+    worker_drive_size: 10
+    worker_VM_prefix: EAtest
+    workers_to_deploy: 100
+
+  tasks:
+  - name: Create VM folder {{ vm_folder_name  }} on {{ datacenter_name }}
+    vcenter_folder:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter_name: "{{ datacenter_name }}"
+      folder_name: "{{ vm_folder_name }}"
+      folder_type: vm
+      state: present
+    register: vm_folder_creation_result
+
+  - name: Create VM in {{ vm_folder_name  }} on {{ datacenter_name }}
+    vmware_guest:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: no
+      datacenter: "{{ datacenter_name }}"
+      cluster: "{{ cluster_name }}"
+      folder: "{{ vm_folder_name }}"
+      name: "{{ vm_name }}"
+      state: poweredon
+      guest_id: windows9Server64Guest
+      #esxi_hostname: "{{ esxi_hostname }}"
+      disk:
+      - size_gb: "{{ vm_disk_size }}"
+        type: "{{ vm_disk_provisioning }}"
+        datastore: "{{ vm_datastore }}"
+      hardware:
+        memory_mb: "{{ vm_memory }}"
+        num_cpus: "{{ vm_cpus }}"
+        scsi: "{{ vm_scsi }}"
+      networks:
+      - name: "{{ vm_network }}"
+        device_type: vmxnet3
+      #wait_for_ip_address: yes
+    delegate_to: localhost
+    register: deploy_vm
+
+
+
+...
+
