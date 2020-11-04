@@ -10,6 +10,7 @@
     cluster_name: HXNVME
     vm_network: vm-nvme-network-72
     vm_folder_name: Test-JA
+    vm_parent_folder:
     vm_name: test_vm_ja
     vm_disk_size: 100
     vm_disk_provisioning: thin
@@ -34,6 +35,7 @@
       validate_certs: False
       datacenter_name: "{{ datacenter_name }}"
       folder_name: "{{ vm_folder_name }}"
+      parent_folder: "{{ vm_parent_folder }}"
       folder_type: vm
       state: present
     register: vm_folder_creation_result
