@@ -1,0 +1,41 @@
+---
+- hosts: localhost
+  gather_facts: no
+
+#  vars:
+#    iso_name: Windows2019-with-unattend.iso
+#    vcenter_hostname: hxafnvmevcsa.wwtpoc.local
+#    vcenter_username: administrator@vsphere.local
+#    vcenter_password: WWTwwt1!
+#    iso_datastore: Phil
+#    datacenter_name: HXNVME
+
+
+  tasks:
+
+  - name: Check for existence of {{ iso_name  }} on {{ iso_datastore }}
+    vsphere_file:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: no
+      datacenter: "{{ datacenter_name }}"
+      datastore: "{{ iso_datastore }}"
+      path: "/ISO/test/{{ iso_name }}"
+    delegate_to: localhost
+    register: ds_file_chk
+    ignore_errors: yes
+
+  - name: Copy {{ iso_name  }} to {{ iso_datastore }}
+    vsphere_copy:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: no
+      src: "/tmp/{{ iso_name }}"
+      datacenter: "{{ datacenter_name }}"
+      datastore: "{{ iso_datastore }}"
+      path: "/ISO/test/{{ iso_name }}"
+    delegate_to: localhost
+    when: ds_file_chk is failed
+...

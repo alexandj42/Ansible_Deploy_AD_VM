@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  gather_facts: no
+
+#  vars:
+#    iso_name: Windows2019-with-unattend.iso
+
+  tasks:
+  - name: Copy {{ iso_name }} to control node
+    get_url:
+      url: "http://pxeboot01.wwtpoc.local/ISO/Microsoft/Server/Ansible/{{ iso_name }}"
+      dest: "/tmp/{{ iso_name }}"
+      validate_certs: no
+
+...
+

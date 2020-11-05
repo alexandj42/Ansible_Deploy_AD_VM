@@ -22,11 +22,12 @@
     ovf_folder_name: /HXNVME/vm/Test-JA 
     eval_iso: ISO/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso
     prod_iso: ISO/en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso
-    test_iso: ISO/Windows2019-with-unattend.iso
+    iso_name: ISO/Windows2019-with-unattend.iso
     runme: true
     vm_ip_address:
     vm_subnet_mask:
     vm_gateway:
+#   iso_datastore: "{{ 'Phil' if vcenter_hostname == 'hxafnvmevcsa.wwtpoc.local' else 'hci_vsanDatastore' if vcenter_hostname == 'hcivc1.wwtpoc.local' else '' }}"
     iso_datastore:
 
 
@@ -61,7 +62,7 @@
         unit_number: 0
         state: present
         type: iso
-        iso_path: "[{{ iso_datastore }}] {{ test_iso }}"
+        iso_path: "[{{ iso_datastore }}] {{ iso_name }}"
       disk:
       - size_gb: "{{ vm_disk_size }}"
         type: "{{ vm_disk_provisioning }}"
