@@ -32,6 +32,42 @@
 
 
   tasks:
+
+  - name: Copy {{ iso_name }} to control node
+    get_url:
+      url: "http://pxeboot01.wwtpoc.local/ISO/Microsoft/Server/Ansible/{{ iso_name }}"
+      dest: "/tmp/{{ iso_name }}"
+      validate_certs: no
+
+
+  - name: Check for existence of {{ iso_name  }} on {{ iso_datastore }}
+    vsphere_file:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: no
+      datacenter: "{{ datacenter_name }}"
+      datastore: "{{ iso_datastore }}"
+      path: "/ISO/test/{{ iso_name }}"
+    delegate_to: localhost
+    register: ds_file_chk
+    ignore_errors: yes
+
+
+  - name: Copy {{ iso_name  }} to {{ iso_datastore }}
+    vsphere_copy:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: no
+      src: "/tmp/{{ iso_name }}"
+      datacenter: "{{ datacenter_name }}"
+      datastore: "{{ iso_datastore }}"
+      path: "/ISO/test/{{ iso_name }}"
+    delegate_to: localhost
+    when: ds_file_chk is failed
+
+
   - name: Create VM folder {{ vm_folder_name  }} on {{ datacenter_name }}
     vcenter_folder:
       hostname: "{{ vcenter_hostname }}"
@@ -44,6 +80,7 @@
       folder_type: vm
       state: present
     register: vm_folder_creation_result
+
 
   - name: Create VM in {{ vm_parent_folder }}/{{ vm_folder_name  }} on {{ datacenter_name }}
     vmware_guest:
@@ -77,8 +114,8 @@
         ip: "{{ vm_ip_address }}"
         netmask: "{{ vm_subnet_mask }}"
         gateway: "{{ vm_gateway }}"
-        wait_for_ip_address: yes
-        wait_for_ip_address_timeout: "600"
+#        wait_for_ip_address: yes
+#        wait_for_ip_address_timeout: "600"
     delegate_to: localhost
     register: deploy_vm
 
