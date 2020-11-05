@@ -27,6 +27,7 @@
     vm_ip_address:
     vm_subnet_mask:
     vm_gateway:
+    iso_datastore:
 
 
   tasks:
@@ -60,7 +61,7 @@
         unit_number: 0
         state: present
         type: iso
-        iso_path: "[Phil] {{ test_iso }}"
+        iso_path: "[{{ iso_datastore }}] {{ test_iso }}"
       disk:
       - size_gb: "{{ vm_disk_size }}"
         type: "{{ vm_disk_provisioning }}"
