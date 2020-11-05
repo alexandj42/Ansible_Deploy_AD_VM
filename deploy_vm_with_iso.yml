@@ -24,6 +24,9 @@
     prod_iso: ISO/en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso
     test_iso: ISO/Windows2019-with-unattend.iso
     runme: true
+    vm_ip_address:
+    vm_subnet_mask:
+    vm_gateway:
 
 
   tasks:
@@ -69,7 +72,11 @@
       networks:
       - name: "{{ vm_network }}"
         device_type: e1000
-        wait_for_ip_address: no
+        ip: "{{ vm_ip_address }}"
+        netmask: "{{ vm_subnet_mask }}"
+        gateway: "{{ vm_gateway }}"
+        wait_for_ip_address: yes
+        wait_for_ip_address_timeout: "600"
     delegate_to: localhost
     register: deploy_vm
 
