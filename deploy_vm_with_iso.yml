@@ -40,7 +40,7 @@
       state: present
     register: vm_folder_creation_result
 
-  - name: Create VM in {{ vm_folder_name  }} on {{ datacenter_name }}
+  - name: Create VM in {{ vm_parent_folder }}/{{ vm_folder_name  }} on {{ datacenter_name }}
     vmware_guest:
       hostname: "{{ vcenter_hostname }}"
       username: "{{ vcenter_username }}"
@@ -48,7 +48,7 @@
       validate_certs: no
       datacenter: "{{ datacenter_name }}"
       cluster: "{{ cluster_name }}"
-      folder: "{{ vm_folder_name }}"
+      folder: "{{ vm_parent_folder }}/{{ vm_folder_name }}"
       name: "{{ vm_name }}"
       state: present
       guest_id: windows9Server64Guest
