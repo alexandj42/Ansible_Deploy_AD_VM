@@ -41,7 +41,7 @@
       validate_certs: no
       datacenter: "{{ datacenter_name }}"
       datastore: "{{ iso_datastore }}"
-      path: "/ISO/test/{{ iso_name }}"
+      path: "/ISO/{{ iso_name }}"
     delegate_to: localhost
     register: ds_file_chk
     ignore_errors: yes
@@ -64,12 +64,12 @@
       src: "/tmp/{{ iso_name }}"
       datacenter: "{{ datacenter_name }}"
       datastore: "{{ iso_datastore }}"
-      path: "/ISO/test/{{ iso_name }}"
+      path: "/ISO/{{ iso_name }}"
     delegate_to: localhost
     when: ds_file_chk is failed
 
 
-  - name: Create VM folder {{ vm_folder_name  }} on {{ datacenter_name }}
+  - name: Create VM folder {{ vm_folder_name  }} on {{ datacenter_name }}/{{ vm_parent_folder }}
     vcenter_folder:
       hostname: "{{ vcenter_hostname }}"
       username: "{{ vcenter_username }}"
