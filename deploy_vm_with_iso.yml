@@ -33,13 +33,6 @@
 
   tasks:
 
-  - name: Copy {{ iso_name }} to control node
-    get_url:
-      url: "http://pxeboot01.wwtpoc.local/ISO/Microsoft/Server/Ansible/{{ iso_name }}"
-      dest: "/tmp/{{ iso_name }}"
-      validate_certs: no
-
-
   - name: Check for existence of {{ iso_name  }} on {{ iso_datastore }}
     vsphere_file:
       hostname: "{{ vcenter_hostname }}"
@@ -52,6 +45,14 @@
     delegate_to: localhost
     register: ds_file_chk
     ignore_errors: yes
+
+
+  - name: Copy {{ iso_name }} to control node
+    get_url:
+      url: "http://pxeboot01.wwtpoc.local/ISO/Microsoft/Server/Ansible/{{ iso_name }}"
+      dest: "/tmp/{{ iso_name }}"
+      validate_certs: no
+    when: ds_file_chk is failed
 
 
   - name: Copy {{ iso_name  }} to {{ iso_datastore }}
